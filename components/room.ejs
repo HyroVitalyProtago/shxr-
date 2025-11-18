@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+ 
+<head>
+    <title><%= room %></title>
+</head>
+ 
+<body>
+    <h2><%= room %></h2>
+    <ul>
+        <% data.forEach(link => { %>
+        <li>
+            <%= link.url %> (<%= link.date %>)
+        </li>
+        <% }) %>
+    </ul>
+</body>
+ 
+</html>
