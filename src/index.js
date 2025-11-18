@@ -33,7 +33,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('/about', function (req, res) {
-  res.sendFile(path.join(__dirname, '..', 'components', 'about.htm'))
+  res.sendFile(path.join(__dirname, '..', 'components', 'about.html'))
 })
 
 // Example API endpoint - JSON
