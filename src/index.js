@@ -7,6 +7,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const app = express()
+app.set('view engine', 'ejs');
 app.use(express.static('public'))
 app.use(express.urlencoded({ extended: true }));
 
@@ -42,8 +43,6 @@ app.post('/', (req, res) => {
   if (!url)
     return res.status(400).json({ error: 'URL is required' });
 
-  // TODO if url does not contains https:// at the beginning, add it
-
   if (!url.startsWith('http')) {
     url = "https://" + url
   }
@@ -61,12 +60,9 @@ app.post('/', (req, res) => {
 
   links[room].push(newLink)
 
-  // res.status(201)//.json(newLink);
-  // Room(req, res)
   res.redirect('/?room='+encodeURIComponent(room))
 });
 
-// TODO
 app.delete('/', (req, res) => {
   const room = req.query.room
   if (!room)
@@ -76,7 +72,6 @@ app.delete('/', (req, res) => {
   if (!url)
     return res.status(400).json({ error: 'URL is required' });
 
-  // console.log('DELETE', room, url)
   links[room] = links[room].filter(link => link.url !== url)
 
   Room(req, res)
@@ -100,8 +95,8 @@ cron.schedule('0 0 * * *', () => {
 export default app
 
 // only for local dev
-// const PORT = 5180;
-//
-// app.listen(PORT, () => {
-//   console.log(`Running on PORT ${PORT}`);
-// })
+const PORT = 5180;
+
+app.listen(PORT, () => {
+  console.log(`Running on PORT ${PORT}`);
+})
