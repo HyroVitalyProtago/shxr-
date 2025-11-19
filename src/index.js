@@ -1,71 +1,107 @@
 import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import cron  from 'node-cron'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const app = express()
+app.use(express.static('public'))
+app.use(express.urlencoded({ extended: true }));
 
 const links = {
   samples: [
-    { url:'https://webxr.vercel.com', date }
+    { url:'https://webxr.vercel.com', expireAt: new Date() }
   ]
 }
-app.post('/:room', (req, res) => {
-  const { link } = req.body;
-  if (!link)
-    return res.status(400).json({ error: 'Link is required' });
 
-  const newLink = { link, date: new Date() }
+const expireInMs = 60/*s*/ * 60/*m*/ * 24/*h*/ * 1000/*ms*/
 
-  if (!links[req.params.room]) {
-    links[req.params.room] = []
+const Room = (req, res) => {
+  const room = req.query.room
+  if (room) {
+    const now = new Date()
+    const lnks = (links[room] ?? [])
+        .filter(link => link.expireAt > now)
+    res.render(
+        path.join(__dirname, '..', 'components', 'room.ejs'),
+        { room, data: lnks }
+    );
+    return true
+  }
+  return false
+}
+
+app.post('/', (req, res) => {
+  const room = req.query.room
+  if (!room)
+    return res.status(400).json({ error: 'Room param is required' });
+
+  let url = req.body.url
+  if (!url)
+    return res.status(400).json({ error: 'URL is required' });
+
+  // TODO if url does not contains https:// at the beginning, add it
+
+  if (!url.startsWith('http')) {
+    url = "https://" + url
   }
 
-  links[req.params.room].push(newLink)
+  const newLink = {
+    url,
+    expireAt: new Date((new Date()).getTime() + expireInMs)
+  }
 
-  res.status(201).json(newLink);
+  if (!links[room]) {
+    links[room] = []
+  } else if (links[room].find(link => link.url === url)) {
+    return res.redirect('/?room='+encodeURIComponent(room))
+  }
+
+  links[room].push(newLink)
+
+  // res.status(201)//.json(newLink);
+  // Room(req, res)
+  res.redirect('/?room='+encodeURIComponent(room))
 });
 
-// app.delete('/:room/:url', (req, res) => {
-//   const index = todos.findIndex(t => t.id === parseInt(req.params.id));
-//   if (index === -1) return res.status(404).json({ error: 'Todo not found' });
+// TODO
+app.delete('/', (req, res) => {
+  const room = req.query.room
+  if (!room)
+    return res.status(400).json({ error: 'Room param is required' });
 
-//   todos.splice(index, 1);
-//   res.status(204).send();
-// });
+  const url = req.query.url
+  if (!url)
+    return res.status(400).json({ error: 'URL is required' });
+
+  // console.log('DELETE', room, url)
+  links[room] = links[room].filter(link => link.url !== url)
+
+  Room(req, res)
+});
 
 // Home route - HTML
 app.get('/', (req, res) => {
+  if (Room(req, res)) return
+
   res.sendFile(path.join(__dirname, '..', 'components', 'index.html'))
 })
 
-app.get('/about', function (req, res) {
-  res.sendFile(path.join(__dirname, '..', 'components', 'about.html'))
-})
-
-// show all links that belongs to that room
-app.get('/room/:room', function (req, res) {
-  res.render(
-    path.join(__dirname, '..', 'components', 'room.ejs'),
-    { room: req.params.room, data: links[req.params.room] ?? [] }
-  );
+cron.schedule('0 0 * * *', () => {
+  // cleanup all expired links
+  const now = new Date()
+  for (const roomId in links) {
+    links[roomId] = links[roomId].filter(link => link.expireAt > now)
+  }
 });
 
-// Example API endpoint - JSON
-app.get('/api-data', (req, res) => {
-  res.json({
-    message: 'Here is some sample API data',
-    items: ['apple', 'banana', 'cherry'],
-  })
-})
-
-// Health check
-app.get('/healthz', (req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() })
-})
-
-
-
 export default app
+
+// only for local dev
+// const PORT = 5180;
+//
+// app.listen(PORT, () => {
+//   console.log(`Running on PORT ${PORT}`);
+// })

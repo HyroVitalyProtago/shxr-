@@ -2,18 +2,38 @@
 <html>
  
 <head>
-    <title><%= room %></title>
+    <title>shxr.link - <%= room %></title>
+    <link rel="stylesheet" href="/style.css" />
 </head>
  
 <body>
-    <h2><%= room %></h2>
-    <ul>
+    <nav>
+        <h1><a href="/">shxr.link</a></h1>
+    </nav>
+    <h2><span class="room">room</span><%= room %></h2>
+    <ul class="links">
         <% data.forEach(link => { %>
         <li>
-            <%= link.url %> (<%= link.date %>)
+            <a href="<%= link.url %>" target="_blank">
+                <div>
+                    <h1><%= link.url %></h1>
+<!--                    <div class="expire">expires in <%= link.expires %>h</div>-->
+                </div>
+            </a>
+            <button onclick="fetch(`/?room=<%= room %>&url=${encodeURI('<%= link.url %>')}`, {method: 'DELETE'}).then(() => location.reload())">
+                ✖
+            </button>
         </li>
         <% }) %>
     </ul>
+
+    <form method="POST" class="input-btn">
+<!--        <input type="hidden" name="room" value="<%= room %>"/>-->
+        <input type="text" name="url" placeholder="https://..."/>
+        <button type="submit">
+            <svg viewBox="0 0 24 24" style="width: 1.5rem; height: 1.5rem;" role="presentation"><path d="M2,21L23,12L2,3V10L17,12L2,14V21Z" style="fill: currentcolor;"></path></svg>
+        </button>
+    </form>
 </body>
  
 </html>
