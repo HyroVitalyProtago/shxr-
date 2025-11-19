@@ -1,31 +1,20 @@
-# Express.js on Vercel
+# shxr - Share XR
+hmd.link with public rooms - aka you don't need to be on the same network!
 
-Basic Express.js + Vercel example that serves html content, JSON data and simulates an api route.
+- Visit shxr.vercel.app on your PC
+- Enter a room
+- Paste the URL you want to share
 
-## How to Use
+- Visit shxr.vercel.app on your other device (even on another network)
+- Enter the same room you used on the PC
+- Click on the link to open it!
 
-You can choose from one of the following two methods to use this repository:
+## Why?
+In my XR classes, I often notice students having trouble entering URLs.
+Their PCs are wired to Ethernet while the headsets connect via Wi‑Fi, so tools like hmd.link won’t work.
+Even when both devices are on the same network, the same link is shared by many, leading to conflicts.
+shxr is just another convenient tool depending on your context!
 
-### One-Click Deploy
-
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=vercel-examples):
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/vercel/examples/tree/main/solutions/express&project-name=express&repository-name=express)
-
-### Clone and Deploy
-
-```bash
-git clone https://github.com/vercel/examples/tree/main/solutions/express
-```
-
-Install the Vercel CLI:
-
-```bash
-npm i -g vercel
-```
-
-Then run the app at the root of the repository:
-
-```bash
-vercel dev
-```
+## How?
+It's just a tiny express server with not even a database.
+URLs are cleaned up every 24h.
